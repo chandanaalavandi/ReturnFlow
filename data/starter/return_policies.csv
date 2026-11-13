@@ -1,0 +1,5 @@
+policy_id,category,effective_from,effective_to,return_window_days,final_sale,restocking_fee_basis_points,policy_version
+POL-2026-01,APPAREL,2026-01-01,2026-12-31,30,False,0,2026.1
+POL-2026-02,HOME,2026-01-01,2026-12-31,45,False,0,2026.1
+POL-2026-03,ELECTRONICS,2026-01-01,2026-12-31,30,False,500,2026.1
+POL-2026-04,BEAUTY,2026-01-01,2026-12-31,14,True,0,2026.1
