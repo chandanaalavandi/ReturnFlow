@@ -33,7 +33,8 @@ python -m returnflow.cli generate --scale starter --orders 1000 `
 
 The request count must be between 5 and the order count; return lines must be
 between one and four per request. The default seed is `20261022`. Generated
-files go into `data\` (git-ignored because full-scale exports are large).
+files go into `data\`; the checked-in starter export is included for review,
+while full/custom exports are git-ignored because they are large.
 
 Run the tests without installing dependencies:
 
