@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "returnflow"
+version = "1.0.0"
+description = "End-to-end returns workflow with a deterministic synthetic dataset, policy engine, and reconciliation checks."
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{name = "ReturnFlow"}]
+
+[project.scripts]
+returnflow = "returnflow.cli:main"
+
+[tool.setuptools.package-data]
+returnflow = ["schema.sql"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["returnflow*"]
