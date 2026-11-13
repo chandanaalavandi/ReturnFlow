@@ -8,10 +8,39 @@ No customer names, email addresses, or external datasets are used.
 
 ## Run it
 
-Python 3.11 or newer is required. From the project root:
+Python 3.11 or newer is required. No runtime packages or frontend build tools
+are needed. From the project root, generate a small dataset and start the
+local dashboard:
 
 ```powershell
 python -m returnflow.cli generate --scale starter
+python -m returnflow.cli serve --scale starter --port 8000
+```
+
+Open **http://127.0.0.1:8000** in your browser. The server binds to localhost
+by default and serves a responsive frontend alongside the Python API. Stop it
+with `Ctrl+C`.
+
+The dashboard includes request status filters, RMA/order search, paginated
+return requests, refund and shipment state, disposition metrics, labelled
+exception cases, dataset generation, and an on-demand validation action. To
+use the full dataset in the dashboard, generate it and select the Full dataset
+profile (or start the app directly against it):
+
+```powershell
+python -m returnflow.cli generate --scale full
+python -m returnflow.cli serve --scale full --port 8000
+```
+
+You can generate either dataset from the dashboard's **Generate data** button.
+The first launch automatically creates the selected profile if it is missing.
+The UI and backend use only local project assets and Python's standard
+library; no third-party font/CDN requests are made.
+
+To run tests or check data while the dashboard is stopped:
+
+```powershell
+python -m unittest discover -s tests -v
 python -m returnflow.cli validate data\starter
 ```
 
@@ -35,12 +64,6 @@ The request count must be between 5 and the order count; return lines must be
 between one and four per request. The default seed is `20261022`. Generated
 files go into `data\`; the checked-in starter export is included for review,
 while full/custom exports are git-ignored because they are large.
-
-Run the tests without installing dependencies:
-
-```powershell
-python -m unittest discover -s tests -v
-```
 
 ## Workflow and decisions
 

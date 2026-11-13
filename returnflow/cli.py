@@ -6,36 +6,15 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any
 
-from returnflow.export import write_exports
+from returnflow.export import load_export, write_exports
 from returnflow.generator import SEED, generate_dataset
-from returnflow.schema import TABLE_ORDER
 from returnflow.validation import validate_dataset
 
 SCALES = {
     "starter": (300, 50, 80),
     "full": (30_000, 5_000, 8_000),
 }
-
-
-def _load_export(path: Path) -> dict[str, Any]:
-    tables = {name: [] for name in TABLE_ORDER}
-    with (path / "records.jsonl").open("r", encoding="utf-8") as stream:
-        for line in stream:
-            item = json.loads(line)
-            if item["table"] not in tables:
-                raise ValueError(f"Unknown table in records.jsonl: {item['table']}")
-            tables[item["table"]].append(item["record"])
-    ground_truth = json.loads((path / "ground_truth.json").read_text(encoding="utf-8"))
-    manifest = json.loads((path / "dataset_manifest.json").read_text(encoding="utf-8"))
-    return {
-        "tables": tables,
-        "ground_truth": ground_truth,
-        "seed": manifest["seed"],
-        "counts": {name: len(tables[name]) for name in TABLE_ORDER},
-        "as_of_date": manifest["as_of_date"],
-    }
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -50,6 +29,11 @@ def build_parser() -> argparse.ArgumentParser:
     generate.add_argument("--output", type=Path)
     validate = commands.add_parser("validate", help="validate an existing generated export")
     validate.add_argument("directory", type=Path)
+    serve = commands.add_parser("serve", help="run the local web dashboard")
+    serve.add_argument("--host", default="127.0.0.1")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument("--data-dir", type=Path, default=Path("data"))
+    serve.add_argument("--scale", choices=tuple(SCALES), default="starter")
     return parser
 
 
@@ -76,8 +60,17 @@ def main(argv: list[str] | None = None) -> int:
         }, indent=2))
         return 0
 
+    if args.command == "serve":
+        from returnflow.web import serve_dashboard
+
+        try:
+            serve_dashboard(args.host, args.port, args.data_dir, args.scale)
+        except (OSError, ValueError) as error:
+            parser.error(str(error))
+        return 0
+
     try:
-        dataset = _load_export(args.directory)
+        dataset = load_export(args.directory)
     except (OSError, ValueError, KeyError, json.JSONDecodeError) as error:
         parser.error(f"Cannot load dataset from {args.directory}: {error}")
         return 2

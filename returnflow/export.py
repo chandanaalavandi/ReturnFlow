@@ -6,6 +6,7 @@ import csv
 import hashlib
 import json
 import shutil
+import csv
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,27 @@ GROUND_TRUTH_COLUMNS = (
     "ground_truth_id", "entity_type", "entity_id", "issue_type",
     "expected_outcome", "severity",
 )
+
+
+def load_export(path: str | Path) -> dict[str, Any]:
+    """Load an exported dataset for validation and application use."""
+    directory = Path(path)
+    tables = {name: [] for name in TABLE_ORDER}
+    with (directory / "records.jsonl").open("r", encoding="utf-8") as stream:
+        for line in stream:
+            item = json.loads(line)
+            if item["table"] not in tables:
+                raise ValueError(f"Unknown table in records.jsonl: {item['table']}")
+            tables[item["table"]].append(item["record"])
+    ground_truth = json.loads((directory / "ground_truth.json").read_text(encoding="utf-8"))
+    manifest = json.loads((directory / "dataset_manifest.json").read_text(encoding="utf-8"))
+    return {
+        "tables": tables,
+        "ground_truth": ground_truth,
+        "seed": manifest["seed"],
+        "counts": {name: len(tables[name]) for name in TABLE_ORDER},
+        "as_of_date": manifest["as_of_date"],
+    }
 
 
 def _json_text(value: Any) -> str:

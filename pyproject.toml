@@ -14,7 +14,7 @@ authors = [{name = "ReturnFlow"}]
 returnflow = "returnflow.cli:main"
 
 [tool.setuptools.package-data]
-returnflow = ["schema.sql"]
+returnflow = ["schema.sql", "static/*"]
 
 [tool.setuptools.packages.find]
 where = ["."]
